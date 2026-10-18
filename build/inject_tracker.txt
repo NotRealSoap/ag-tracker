@@ -1,0 +1,6 @@
+# Tracker Injection Plan:
+# 1. We'll create a minimal companion config file
+# 2. Modify the mcmod.info to reference our tracking
+# 3. Use bytecode injection on existing classes
+
+# For now, let's verify we can at least modify the metadata

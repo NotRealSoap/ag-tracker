@@ -1,0 +1,57 @@
+name: Compile AutoGrinder Tracker
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+
+    - name: Download autogrinder.jar
+      run: |
+        mkdir -p libs
+        cd libs
+        # Download the original autogrinder JAR
+        curl -L "file:///C:/Users/kaden/Desktop/autogrinder-source/replit-build/autogrinder.jar" -o autogrinder.jar || echo "Will use local copy"
+        cd ..
+
+    - name: Create build directory
+      run: mkdir -p build/classes
+
+    - name: Compile StatTracker
+      run: |
+        javac -encoding UTF-8 \
+          -d build/classes \
+          -cp "replit-build/autogrinder.jar:src/main/java" \
+          src/main/java/org/polyfrost/example/module/modules/StatTracker.java \
+          src/main/java/org/polyfrost/example/ui/StatScoreboard.java \
+          src/main/java/org/polyfrost/example/config/TrackerCommand.java
+
+    - name: Upload compiled classes
+      uses: actions/upload-artifact@v2
+      with:
+        name: compiled-tracker
+        path: build/classes/
+
+    - name: Create JAR with tracker
+      run: |
+        cd build/classes
+        # Copy original JAR
+        cp ../../replit-build/autogrinder.jar ../../AutoGrinder-WithTracker.jar
+        # Add compiled classes to JAR
+        jar uf ../../AutoGrinder-WithTracker.jar org/
+        cd ../..
+
+    - name: Upload final JAR
+      uses: actions/upload-artifact@v2
+      with:
+        name: AutoGrinder-WithTracker
+        path: AutoGrinder-WithTracker.jar
