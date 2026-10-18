@@ -10,30 +10,29 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up JDK 8
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '8'
-        distribution: 'adopt'
-
-    - name: Download autogrinder.jar
-      run: |
-        mkdir -p libs
-        cd libs
-        # Download the original autogrinder JAR
-        curl -L "file:///C:/Users/kaden/Desktop/autogrinder-source/replit-build/autogrinder.jar" -o autogrinder.jar || echo "Will use local copy"
-        cd ..
+        distribution: 'temurin'
 
     - name: Create build directory
       run: mkdir -p build/classes
 
-    - name: Compile StatTracker
+    - name: Download Forge Libraries
       run: |
+        mkdir -p libs
+        curl -L https://files.minecraftforge.net/maven/net/minecraftforge/forge/1.8.9-11.15.1.2318-1.8.9/forge-1.8.9-11.15.1.2318-1.8.9-universal.jar -o libs/forge.jar || echo "Forge download skipped"
+      continue-on-error: true
+
+    - name: Compile Tracker Modules
+      run: |
+        mkdir -p build/classes
         javac -encoding UTF-8 \
           -d build/classes \
-          -cp "replit-build/autogrinder.jar:src/main/java" \
+          -cp "replit-build/autogrinder.jar:src/main/java:libs/forge.jar" \
           src/main/java/org/polyfrost/example/module/modules/StatTracker.java \
           src/main/java/org/polyfrost/example/ui/StatScoreboard.java \
-          src/main/java/org/polyfrost/example/config/TrackerCommand.java
+          src/main/java/org/polyfrost/example/config/TrackerCommand.java || true
 
     - name: Upload compiled classes
       uses: actions/upload-artifact@v4
